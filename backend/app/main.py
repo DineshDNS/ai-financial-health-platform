@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
 from app.api.routes import health, analysis, upload, dashboard
+from app.api.routes.ai_analysis import router as ai_router  # ✅ PHASE 5
+
 from app.core.database import Base, engine
 
 # Import all models so SQLAlchemy can register them
@@ -32,6 +34,10 @@ app.include_router(upload.router)
 # -----------------------------
 app.include_router(dashboard.router)
 
+# -----------------------------
+# PHASE 5 ROUTES (AI / ML APIs)
+# -----------------------------
+app.include_router(ai_router)
 
 # -----------------------------
 # ROOT ENDPOINT
@@ -45,7 +51,8 @@ def root():
             "Phase 1",
             "Phase 2",
             "Phase 3",
-            "Phase 4"
+            "Phase 4",
+            "Phase 5 (ML Core Integrated)"
         ],
-        "current_module": "Dashboard API Layer"
+        "current_module": "Machine Learning Intelligence Layer"
     }
