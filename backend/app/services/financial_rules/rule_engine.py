@@ -8,11 +8,23 @@ from .health_score import calculate_health_score
 from .risk_band import get_risk_band
 
 
-def generate_financial_kpis():
-    data = get_financial_aggregates()
+def generate_financial_kpis(db):
+    """
+    Main Rule Engine Entry Point
+    Called by:
+    - Phase 4 Dashboard APIs
+    - Phase 5 ML models (later)
+    - Phase 7 AI explanation layer (later)
+    """
+
+    # Pull aggregated financial values from DB
+    data = get_financial_aggregates(db)
 
     metrics = {}
 
+    # -----------------------------
+    # LIQUIDITY METRICS
+    # -----------------------------
     metrics["current_ratio"] = current_ratio(
         data["current_assets"],
         data["current_liabilities"]
@@ -29,6 +41,9 @@ def generate_financial_kpis():
         data["current_liabilities"]
     )
 
+    # -----------------------------
+    # PROFITABILITY METRICS
+    # -----------------------------
     metrics["net_profit_margin"] = net_profit_margin(
         data["net_profit"],
         data["revenue"]
@@ -39,6 +54,9 @@ def generate_financial_kpis():
         data["revenue"]
     )
 
+    # -----------------------------
+    # LEVERAGE METRICS
+    # -----------------------------
     metrics["debt_to_equity"] = debt_to_equity(
         data["total_debt"],
         data["equity"]
@@ -49,6 +67,9 @@ def generate_financial_kpis():
         data["current_assets"]
     )
 
+    # -----------------------------
+    # CASHFLOW METRICS
+    # -----------------------------
     metrics["cashflow_coverage"] = cashflow_coverage(
         data["cash_inflow"],
         data["total_debt"]
@@ -59,15 +80,27 @@ def generate_financial_kpis():
         data["cash_outflow"]
     )
 
+    # -----------------------------
+    # EFFICIENCY METRIC
+    # -----------------------------
     metrics["expense_efficiency"] = expense_efficiency(
         data["net_profit"],
         data["expenses"]
     )
 
-    metrics["health_score"] = calculate_health_score(metrics)
-    metrics["risk_band"] = get_risk_band(metrics["health_score"])
+    # -----------------------------
+    # FINAL INTELLIGENCE
+    # -----------------------------
+    health_score = calculate_health_score(metrics)
+    risk_band = get_risk_band(health_score)
+
+    # Add to metrics dictionary
+    metrics["health_score"] = health_score
+    metrics["risk_band"] = risk_band
 
     return {
         "aggregates": data,
-        "kpis": metrics
+        "kpis": metrics,
+        "health_score": health_score,
+        "risk_band": risk_band
     }
