@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
 
-def generate_credit_dataset(n=50000):
+def generate_kpi_dataset(n=50000):
 
     data = []
 
@@ -20,13 +20,14 @@ def generate_credit_dataset(n=50000):
         cashflow_coverage = np.random.uniform(-1, 3)
         expense_efficiency = np.random.uniform(0.5, 1.5)
 
-        decision = "Eligible"
+        # Risk logic
+        risk = "Low"
 
-        if debt_ratio > 0.7 or net_profit_margin < 0:
-            decision = "Review"
+        if net_profit_margin < 0 or debt_ratio > 0.7:
+            risk = "Medium"
 
-        if debt_ratio > 0.9 or net_profit_margin < -0.1:
-            decision = "Not Eligible"
+        if net_profit_margin < -0.1 or debt_ratio > 0.9:
+            risk = "High"
 
         data.append([
             current_ratio,
@@ -38,15 +39,15 @@ def generate_credit_dataset(n=50000):
             debt_ratio,
             cashflow_coverage,
             expense_efficiency,
-            decision
+            risk
         ])
 
     return np.array(data)
 
 
-def train_credit_model():
+def train_advanced_risk_model():
 
-    dataset = generate_credit_dataset()
+    dataset = generate_kpi_dataset()
 
     X = dataset[:, :-1].astype(float)
     y = dataset[:, -1]
@@ -58,10 +59,10 @@ def train_credit_model():
     model = RandomForestClassifier(n_estimators=300)
     model.fit(X_train, y_train)
 
-    joblib.dump(model, "ml_models/credit_scoring/model.pkl")
+    joblib.dump(model, "ml_models/risk_model/model.pkl")
 
-    print("Advanced Credit Model Trained & Saved")
+    print("Advanced KPI-based Risk Model Trained & Saved")
 
 
 if __name__ == "__main__":
-    train_credit_model()
+    train_advanced_risk_model()

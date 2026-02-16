@@ -1,11 +1,31 @@
 from fastapi import FastAPI
 
+# -----------------------------
+# CORE ROUTES (PHASE 1–4)
+# -----------------------------
 from app.api.routes import health, analysis, upload, dashboard
-from app.api.routes.ai_analysis import router as ai_router  # ✅ PHASE 5
 
+# -----------------------------
+# PHASE 5 — ML ROUTES
+# -----------------------------
+from app.api.routes.ai_analysis import router as ai_router
+
+# -----------------------------
+# PHASE 6 — FORECAST ROUTES
+# -----------------------------
+from app.api.routes import forecast
+
+# -----------------------------
+# PHASE 7 — OLLAMA AI EXPLANATION ROUTES
+# -----------------------------
+from app.ai_engine.routes.ai_explain_routes import router as ai_explain_router
+
+# -----------------------------
+# DATABASE
+# -----------------------------
 from app.core.database import Base, engine
 
-# Import all models so SQLAlchemy can register them
+# Import models so SQLAlchemy registers tables
 from app.models import revenue, expenses, loans, inventory, bank
 
 
@@ -15,7 +35,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Create database tables automatically
+# -----------------------------
+# CREATE TABLES
+# -----------------------------
 Base.metadata.create_all(bind=engine)
 
 # -----------------------------
@@ -35,9 +57,20 @@ app.include_router(upload.router)
 app.include_router(dashboard.router)
 
 # -----------------------------
-# PHASE 5 ROUTES (AI / ML APIs)
+# PHASE 5 ROUTES (AI / ML)
 # -----------------------------
 app.include_router(ai_router)
+
+# -----------------------------
+# PHASE 6 ROUTES (Forecast)
+# Prefix added to keep under /ai
+# -----------------------------
+app.include_router(forecast.router, prefix="/ai", tags=["Forecast"])
+
+# -----------------------------
+# PHASE 7 ROUTES (Ollama AI Layer)
+# -----------------------------
+app.include_router(ai_explain_router)
 
 # -----------------------------
 # ROOT ENDPOINT
@@ -52,7 +85,9 @@ def root():
             "Phase 2",
             "Phase 3",
             "Phase 4",
-            "Phase 5 (ML Core Integrated)"
+            "Phase 5 (ML Core)",
+            "Phase 6 (Forecast Engine)",
+            "Phase 7 (AI Explanation Layer)"
         ],
-        "current_module": "Machine Learning Intelligence Layer"
+        "current_module": "Ollama AI Narrative Intelligence"
     }
