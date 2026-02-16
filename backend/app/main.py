@@ -1,4 +1,25 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+# -----------------------------
+# CREATE FASTAPI APP (ONLY ONCE)
+# -----------------------------
+app = FastAPI(
+    title="AI Financial Health Intelligence API",
+    description="AI-Powered Financial Health Intelligence & Risk Assessment System",
+    version="1.0.0"
+)
+
+# -----------------------------
+# ENABLE CORS
+# -----------------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # -----------------------------
 # CORE ROUTES (PHASE 1–4)
@@ -28,13 +49,6 @@ from app.core.database import Base, engine
 # Import models so SQLAlchemy registers tables
 from app.models import revenue, expenses, loans, inventory, bank
 
-
-app = FastAPI(
-    title="AI Financial Health Intelligence API",
-    description="AI-Powered Financial Health Intelligence & Risk Assessment System",
-    version="1.0.0"
-)
-
 # -----------------------------
 # CREATE TABLES
 # -----------------------------
@@ -52,23 +66,22 @@ app.include_router(analysis.router)
 app.include_router(upload.router)
 
 # -----------------------------
-# PHASE 4 ROUTES (Dashboard APIs)
+# PHASE 4 ROUTES
 # -----------------------------
 app.include_router(dashboard.router)
 
 # -----------------------------
-# PHASE 5 ROUTES (AI / ML)
+# PHASE 5 ROUTES
 # -----------------------------
 app.include_router(ai_router)
 
 # -----------------------------
-# PHASE 6 ROUTES (Forecast)
-# Prefix added to keep under /ai
+# PHASE 6 ROUTES
 # -----------------------------
 app.include_router(forecast.router, prefix="/ai", tags=["Forecast"])
 
 # -----------------------------
-# PHASE 7 ROUTES (Ollama AI Layer)
+# PHASE 7 ROUTES
 # -----------------------------
 app.include_router(ai_explain_router)
 
