@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import CountUp from "react-countup";
+import axios from "axios";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -25,89 +26,114 @@ ChartJS.register(
 
 function Dashboard() {
   const [data, setData] = useState(null);
+  const [credit, setCredit] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await getDashboardFull();
-        setData(res);
-      } catch (err) {
-        console.error("Dashboard load failed:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboard();
+    load();
   }, []);
 
+  const load = async () => {
+    try {
+      const res = await getDashboardFull();
+      setData(res);
+
+      const creditRes = await axios.get("http://127.0.0.1:8000/ai/credit");
+      setCredit(creditRes.data.credit_decision);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) return <div className="p-6">Loading dashboard...</div>;
-  if (error || !data) return <div className="p-6 text-red-500">Failed to load dashboard data.</div>;
 
-  const healthScore = data.summary?.health_score ?? 0;
-  const riskBand = data.summary?.risk_band ?? "Low Risk";
+  const healthScore = data.summary.health_score;
+  const riskBand = data.summary.risk_band;
 
-  const netProfit =
-    (data.trends?.revenue ?? 0) - (data.trends?.expenses ?? 0);
+  const revenue = data.trends.revenue;
+  const expenses = data.trends.expenses;
+  const profit = revenue - expenses;
+  const cash = data.metrics.working_capital;
 
-  const revenue = data.trends?.revenue ?? 0;
-  const expenses = data.trends?.expenses ?? 0;
-  const cashBalance = data.metrics?.working_capital ?? 0;
+  const cashflowHealth = data.metrics.cashflow_health;
+  const debtRatio = data.metrics.debt_ratio;
+  const currentRatio = data.metrics.current_ratio;
 
-  /* -------------------------
-     RISK COLOR SYSTEM
-  -------------------------- */
-  const getRiskClass = () => {
-    if (riskBand.toLowerCase().includes("high")) return "risk-high";
-    if (riskBand.toLowerCase().includes("medium")) return "risk-medium";
-    return "risk-low";
-  };
+  /* =========================
+     COLOR SYSTEM
+  ========================= */
 
-  /* -------------------------
-     HEALTH SCORE COLOR SYSTEM
-  -------------------------- */
-  const getHealthClass = () => {
-    if (healthScore >= 75) return "health-good";
-    if (healthScore >= 50) return "health-medium";
-    return "health-poor";
-  };
+  const healthClass =
+    healthScore >= 75
+      ? "health-good"
+      : healthScore >= 50
+      ? "health-medium"
+      : "health-poor";
 
-  const isDark = document.documentElement.classList.contains("dark");
+  const riskClass =
+    riskBand.includes("High")
+      ? "risk-high"
+      : riskBand.includes("Medium")
+      ? "risk-medium"
+      : "risk-low";
 
-  /* -------------------------
-     CHART COLOR BASED ON RISK
-  -------------------------- */
-  let lineColor = "#22c55e"; // Low Risk → Green
-  let fillColor = "rgba(34,197,94,0.18)";
+  const creditClass =
+    credit === "Eligible"
+      ? "credit-good"
+      : credit === "Review"
+      ? "credit-review"
+      : "credit-bad";
 
-  if (riskBand.toLowerCase().includes("medium")) {
-    lineColor = "#f59e0b"; // Medium → Yellow
-    fillColor = "rgba(245,158,11,0.22)";
-  }
+  const cashflowClass =
+    cashflowHealth === "Strong"
+      ? "health-good"
+      : cashflowHealth === "Stable"
+      ? "health-medium"
+      : "health-poor";
 
-  if (riskBand.toLowerCase().includes("high")) {
-    lineColor = "#ef4444"; // High → Red
-    fillColor = "rgba(239,68,68,0.22)";
-  }
+  const profitClass =
+    profit > 0 ? "border-green-400" : "border-red-400";
+
+  const cashClass =
+    cash > 100000
+      ? "border-green-400"
+      : cash > 0
+      ? "border-yellow-400"
+      : "border-red-400";
+
+  const debtClass =
+    debtRatio > 2
+      ? "border-red-400"
+      : debtRatio > 1
+      ? "border-yellow-400"
+      : "border-green-400";
+
+  const currentRatioClass =
+    currentRatio > 1.5
+      ? "border-green-400"
+      : currentRatio > 1
+      ? "border-yellow-400"
+      : "border-red-400";
+
+  /* =========================
+     CHART DATA
+  ========================= */
 
   const chartData = {
     labels: ["Revenue", "Expenses", "Profit"],
     datasets: [
       {
         label: "Financial Overview",
-        data: [revenue, expenses, netProfit],
-        borderColor: lineColor,
-        backgroundColor: fillColor,
+        data: [revenue, expenses, profit],
+        borderColor: "#f59e0b",
+        backgroundColor: "rgba(245,158,11,0.18)",
         borderWidth: 3,
         tension: 0.4,
-        fill: true,
-        pointRadius: 4,
-        pointBackgroundColor: lineColor,
+        fill: true
       }
-    ],
+    ]
   };
 
   const chartOptions = {
@@ -116,28 +142,7 @@ function Dashboard() {
     plugins: {
       legend: {
         labels: {
-          color: isDark ? "#0a7b9a" : "#13ada8",
           font: { size: 13, weight: "600" }
-        },
-      },
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: isDark ? "#1783a4" : "#1783a4",
-          font: { weight: "600" }
-        },
-        grid: {
-          color: isDark ? "rgba(135, 232, 218, 0.08)" : "rgba(147, 232, 219, 0.08)"
-        }
-      },
-      y: {
-        ticks: {
-          color: isDark ? "#1783a4" : "#1783a4",
-          font: { weight: "600" }
-        },
-        grid: {
-          color: isDark ? "rgba(147, 232, 219, 0.08)" : "rgba(147, 232, 219, 0.08)"
         }
       }
     }
@@ -146,35 +151,29 @@ function Dashboard() {
   return (
     <div className="flex flex-col gap-6">
 
-      {/* KPI ROW */}
+      {/* HERO LAYER */}
       <div className="grid grid-cols-4 gap-6">
 
-        <div className={`glass-card h-[130px] px-6 py-5 flex flex-col justify-center ${getHealthClass()}`}>
-          <p className="text-sm text-gray-700 dark:text-gray-300">Health Score</p>
-          <h2 className="text-3xl font-bold mt-1">
-            <CountUp end={healthScore} duration={2} />
+        <div className={`glass-card p-6 ${healthClass}`}>
+          <p>Health Score</p>
+          <h2 className="text-3xl font-bold">
+            <CountUp end={healthScore} />
           </h2>
         </div>
 
-        <div className="glass-card h-[130px] px-6 py-5 flex flex-col justify-center">
-          <p className="text-sm text-gray-700 dark:text-gray-300">Net Profit</p>
-          <h2 className="text-3xl font-bold mt-1 metric-value">
-            ₹<CountUp end={netProfit} duration={2} separator="," />
-          </h2>
+        <div className={`glass-card p-6 ${riskClass}`}>
+          <p>Risk Band</p>
+          <h2 className="text-xl font-bold">{riskBand}</h2>
         </div>
 
-        <div className="glass-card h-[130px] px-6 py-5 flex flex-col justify-center">
-          <p className="text-sm text-gray-700 dark:text-gray-300">Revenue</p>
-          <h2 className="text-3xl font-bold mt-1 metric-value">
-            ₹<CountUp end={revenue} duration={2} separator="," />
-          </h2>
+        <div className={`glass-card p-6 ${creditClass}`}>
+          <p>Credit Eligibility</p>
+          <h2 className="text-xl font-bold">{credit}</h2>
         </div>
 
-        <div className="glass-card h-[130px] px-6 py-5 flex flex-col justify-center">
-          <p className="text-sm text-gray-700 dark:text-gray-300">Cash Balance</p>
-          <h2 className="text-3xl font-bold mt-1 metric-value">
-            ₹<CountUp end={cashBalance} duration={2} separator="," />
-          </h2>
+        <div className={`glass-card p-6 ${cashflowClass}`}>
+          <p>Cashflow Health</p>
+          <h2 className="text-xl font-bold">{cashflowHealth}</h2>
         </div>
 
       </div>
@@ -183,9 +182,9 @@ function Dashboard() {
       <div className="grid grid-cols-3 gap-6">
 
         {/* CHART */}
-        <div className="col-span-2 glass-card chart-panel p-6 h-[420px] flex flex-col">
-          <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
-            Revenue vs Expenses Trend
+        <div className="col-span-2 glass-card chart-panel p-6 h-[515px] flex flex-col">
+          <h2 className="text-lg font-semibold">
+            Financial Overview
           </h2>
 
           <div className="flex-1">
@@ -193,32 +192,73 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
-        <div className="flex flex-col gap-6">
+        {/* RIGHT SIDE CARDS */}
+        <div className="flex flex-col gap-7">
 
-          <div className={`glass-card h-[110px] px-6 py-5 flex flex-col justify-center ${getRiskClass()}`}>
-            <p className="text-sm text-gray-700 dark:text-gray-300">Risk Band</p>
-            <h2 className="text-xl font-bold mt-1">
-              {riskBand}
+          <div className="glass-card p-6 border-green-400">
+            <p>Revenue</p>
+            <h2 className="text-2xl font-bold">
+              ₹<CountUp end={revenue} separator="," />
             </h2>
           </div>
 
-          <div className="glass-card h-[110px] px-6 py-5 flex flex-col justify-center">
-            <p className="text-sm text-gray-700 dark:text-gray-300">Credit Eligibility</p>
-            <h2 className="text-xl font-bold mt-1 metric-value">
-              Review
+          <div className="glass-card p-6 border-red-400">
+            <p>Expenses</p>
+            <h2 className="text-2xl font-bold">
+              ₹<CountUp end={expenses} separator="," />
             </h2>
           </div>
 
-          <div className="glass-card h-[110px] px-6 py-5 flex flex-col justify-center">
-            <p className="text-sm text-gray-700 dark:text-gray-300">AI Confidence</p>
-            <h2 className="text-xl font-bold mt-1 metric-value">
-              87%
+          <div className={`glass-card p-6 ${profitClass}`}>
+            <p>Net Profit</p>
+            <h2 className="text-2xl font-bold">
+              ₹<CountUp end={profit} separator="," />
+            </h2>
+          </div>
+
+          <div className={`glass-card p-6 ${cashClass}`}>
+            <p>Cash Balance</p>
+            <h2 className="text-2xl font-bold">
+              ₹<CountUp end={cash} separator="," />
             </h2>
           </div>
 
         </div>
       </div>
+
+      {/* KPI ROW */}
+      <div className="grid grid-cols-4 gap-6">
+
+        <div className="glass-card p-6">
+          <p>Profit Margin</p>
+          <h2 className="text-xl font-bold">
+            {data.metrics.net_profit_margin}%
+          </h2>
+        </div>
+
+        <div className="glass-card p-6">
+          <p>Expense Ratio</p>
+          <h2 className="text-xl font-bold">
+            {data.metrics.expense_ratio}%
+          </h2>
+        </div>
+
+        <div className={`glass-card p-6 ${debtClass}`}>
+          <p>Debt Ratio</p>
+          <h2 className="text-xl font-bold">
+            {debtRatio}
+          </h2>
+        </div>
+
+        <div className={`glass-card p-6 ${currentRatioClass}`}>
+          <p>Current Ratio</p>
+          <h2 className="text-xl font-bold">
+            {currentRatio?.toFixed(2)}
+          </h2>
+        </div>
+
+      </div>
+
     </div>
   );
 }

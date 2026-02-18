@@ -16,7 +16,7 @@ function Sidebar({ collapsed }) {
     { name: "Upload", path: "/upload", icon: Upload },
     { name: "Risk", path: "/risk", icon: AlertTriangle },
     { name: "Forecast", path: "/forecast", icon: LineChart },
-    { name: "AI Insights", path: "/ai", icon: Brain },
+    { name: "AI Intelligence", path: "/ai", icon: Brain },
     { name: "Reports", path: "/reports", icon: FileText },
   ];
 

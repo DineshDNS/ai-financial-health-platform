@@ -10,4 +10,9 @@ class Expense(Base):
     amount = Column(Float)
     gst_amount = Column(Float)
     category = Column(String)
+
+    # NEW FIELDS
+    source_file = Column(String, index=True)
+    user_id = Column(Integer, index=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)

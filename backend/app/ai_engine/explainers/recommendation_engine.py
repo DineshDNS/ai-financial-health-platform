@@ -1,23 +1,31 @@
 from app.ai_engine.ollama_client import ask_ollama
 
-def generate_business_recommendations(kpis, risk, health_score):
-    prompt = f"""
-You are a senior financial advisor.
 
-Business KPIs:
+def generate_business_recommendations(kpis, risk, health_score):
+
+    prompt = f"""
+You are a senior financial advisor helping an SME business owner.
+
+Business Health Score: {health_score}/100
+Risk Level: {risk}
+
+Key Financial KPIs:
 {kpis}
 
-Risk Level: {risk}
-Health Score: {health_score}/100
+Based on the above financial condition:
 
-Provide clear business recommendations:
+Give 5 practical business recommendations that can:
+- Improve profitability
+- Reduce financial risk
+- Strengthen cashflow
+- Support business growth
 
-1) How to reduce expenses
-2) How to increase revenue
-3) How to improve cashflow
-4) How to reduce financial risk
-5) Immediate action steps
-
-Answer in simple, practical business language.
+Rules:
+- Use bullet points
+- Keep suggestions specific
+- Do NOT repeat generic advice
+- Do NOT restate the input
+- Keep under 120 words
 """
+
     return ask_ollama(prompt)

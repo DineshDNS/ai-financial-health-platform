@@ -1,8 +1,23 @@
 import { useContext } from "react";
+import { useLocation } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
 
 const Topbar = ({ collapsed, toggleSidebar }) => {
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const location = useLocation();
+
+  // Dynamic title mapping
+  const getTitle = (path) => {
+    if (path === "/") return "Financial Intelligence Dashboard";
+    if (path.startsWith("/upload")) return "Financial Data Upload";
+    if (path.startsWith("/risk")) return "Risk Analysis";
+    if (path.startsWith("/forecast")) return "Financial Forecast";
+    if (path.startsWith("/ai")) return "AI Intelligence";
+    if (path.startsWith("/reports")) return "Reports";
+    return "FinIntel AI";
+  };
+
+  const pageTitle = getTitle(location.pathname);
 
   return (
     <div
@@ -17,10 +32,7 @@ const Topbar = ({ collapsed, toggleSidebar }) => {
         px-8
         transition-all duration-300
 
-        /* LIGHT MODE */
         bg-white/60
-
-        /* DARK MODE STRONG GLASS */
         dark:bg-slate-900/80
         backdrop-blur-xl
         border-b
@@ -48,7 +60,7 @@ const Topbar = ({ collapsed, toggleSidebar }) => {
           text-gray-900
           dark:text-white
         ">
-          Financial Intelligence Dashboard
+          {pageTitle}
         </h1>
       </div>
 

@@ -1,25 +1,29 @@
 from sqlalchemy import text
 
 
-def get_financial_aggregates(db):
+def get_financial_aggregates(db, user_id):
     """
-    Aggregates all financial values from PostgreSQL.
-    DB session is provided by FastAPI (Dependency Injection).
+    Aggregates all financial values from PostgreSQL
+    filtered by user_id.
     """
 
     # -----------------------------
     # REVENUE
     # -----------------------------
-    revenue = db.execute(text(
-        "SELECT COALESCE(SUM(amount), 0) FROM revenues"
-    )).scalar()
+    revenue = db.execute(text("""
+        SELECT COALESCE(SUM(amount), 0)
+        FROM revenues
+        WHERE user_id = :user_id
+    """), {"user_id": user_id}).scalar()
 
     # -----------------------------
     # EXPENSES
     # -----------------------------
-    expenses = db.execute(text(
-        "SELECT COALESCE(SUM(amount), 0) FROM expenses"
-    )).scalar()
+    expenses = db.execute(text("""
+        SELECT COALESCE(SUM(amount), 0)
+        FROM expenses
+        WHERE user_id = :user_id
+    """), {"user_id": user_id}).scalar()
 
     # -----------------------------
     # NET PROFIT
@@ -29,30 +33,38 @@ def get_financial_aggregates(db):
     # -----------------------------
     # TOTAL DEBT
     # -----------------------------
-    total_debt = db.execute(text(
-        "SELECT COALESCE(SUM(amount), 0) FROM loans"
-    )).scalar()
+    total_debt = db.execute(text("""
+        SELECT COALESCE(SUM(amount), 0)
+        FROM loans
+        WHERE user_id = :user_id
+    """), {"user_id": user_id}).scalar()
 
     # -----------------------------
     # INVENTORY VALUE
     # -----------------------------
-    inventory_value = db.execute(text(
-        "SELECT COALESCE(SUM(quantity * unit_price), 0) FROM inventory"
-    )).scalar()
+    inventory_value = db.execute(text("""
+        SELECT COALESCE(SUM(quantity * unit_price), 0)
+        FROM inventory
+        WHERE user_id = :user_id
+    """), {"user_id": user_id}).scalar()
 
     # -----------------------------
     # CASH INFLOW
     # -----------------------------
-    cash_inflow = db.execute(text(
-        "SELECT COALESCE(SUM(credit), 0) FROM bank_transactions"
-    )).scalar()
+    cash_inflow = db.execute(text("""
+        SELECT COALESCE(SUM(credit), 0)
+        FROM bank_transactions
+        WHERE user_id = :user_id
+    """), {"user_id": user_id}).scalar()
 
     # -----------------------------
     # CASH OUTFLOW
     # -----------------------------
-    cash_outflow = db.execute(text(
-        "SELECT COALESCE(SUM(debit), 0) FROM bank_transactions"
-    )).scalar()
+    cash_outflow = db.execute(text("""
+        SELECT COALESCE(SUM(debit), 0)
+        FROM bank_transactions
+        WHERE user_id = :user_id
+    """), {"user_id": user_id}).scalar()
 
     # -----------------------------
     # LATEST BANK BALANCE
@@ -60,9 +72,10 @@ def get_financial_aggregates(db):
     bank_balance = db.execute(text("""
         SELECT balance
         FROM bank_transactions
+        WHERE user_id = :user_id
         ORDER BY date DESC
         LIMIT 1
-    """)).scalar() or 0
+    """), {"user_id": user_id}).scalar() or 0
 
     # -----------------------------
     # DERIVED SME FINANCIAL MODELS

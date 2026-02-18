@@ -8,17 +8,19 @@ from .health_score import calculate_health_score
 from .risk_band import get_risk_band
 
 
-def generate_financial_kpis(db):
+def generate_financial_kpis(db, user_id):
     """
     Main Rule Engine Entry Point
+    Multi-user aware version
+
     Called by:
     - Phase 4 Dashboard APIs
-    - Phase 5 ML models (later)
-    - Phase 7 AI explanation layer (later)
+    - Phase 5 ML models
+    - Phase 7 AI explanation layer
     """
 
-    # Pull aggregated financial values from DB
-    data = get_financial_aggregates(db)
+    # Pull aggregated financial values filtered by user_id
+    data = get_financial_aggregates(db, user_id)
 
     metrics = {}
 
@@ -94,7 +96,6 @@ def generate_financial_kpis(db):
     health_score = calculate_health_score(metrics)
     risk_band = get_risk_band(health_score)
 
-    # Add to metrics dictionary
     metrics["health_score"] = health_score
     metrics["risk_band"] = risk_band
 

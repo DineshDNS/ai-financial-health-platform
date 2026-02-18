@@ -11,4 +11,9 @@ class Loan(Base):
     interest_rate = Column(Float)
     start_date = Column(String)
     end_date = Column(String)
+
+    # NEW FIELDS
+    source_file = Column(String, index=True)
+    user_id = Column(Integer, index=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes.debug_credit import router as debug_credit_router
 
 # -----------------------------
 # CREATE FASTAPI APP (ONLY ONCE)
@@ -74,6 +75,7 @@ app.include_router(dashboard.router)
 # PHASE 5 ROUTES
 # -----------------------------
 app.include_router(ai_router)
+app.include_router(debug_credit_router) 
 
 # -----------------------------
 # PHASE 6 ROUTES

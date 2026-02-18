@@ -2,21 +2,18 @@ from app.ai_engine.ollama_client import ask_ollama
 
 def generate_investor_summary(kpis, risk, health_score):
     prompt = f"""
-You are an investment analyst preparing a report.
+Investor summary.
 
-Business KPIs:
-{kpis}
-
-Risk Level: {risk}
+Risk: {risk}
 Health Score: {health_score}/100
 
-Write a professional investor summary including:
-
-• Business strengths
-• Business weaknesses
+Write 5 short lines:
+• Strengths
+• Weaknesses
 • Risk outlook
-• Investment recommendation
+• Growth potential
+• Investment opinion
 
-Keep it concise and professional.
+Keep concise.
 """
     return ask_ollama(prompt)

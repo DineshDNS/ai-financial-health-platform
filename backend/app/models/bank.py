@@ -10,4 +10,9 @@ class BankTransaction(Base):
     debit = Column(Float)
     credit = Column(Float)
     balance = Column(Float)
+
+    # NEW FIELDS
+    source_file = Column(String, index=True)
+    user_id = Column(Integer, index=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)

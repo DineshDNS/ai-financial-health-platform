@@ -2,16 +2,16 @@ from app.ai_engine.ollama_client import ask_ollama
 
 def generate_forecast_explanation(forecast_data):
     prompt = f"""
-You are a financial planning expert.
-
-Future predictions:
+Business forecast summary:
 
 {forecast_data}
 
-Explain:
-1) Business future outlook
-2) Growth trend
-3) Warning signs
-4) Strategic planning advice
+Explain in 4 short points:
+- Future outlook
+- Growth trend
+- Warning signs
+- Planning advice
+
+Keep under 80 words.
 """
     return ask_ollama(prompt)

@@ -2,16 +2,16 @@ from app.ai_engine.ollama_client import ask_ollama
 
 def generate_anomaly_explanation(anomaly_result):
     prompt = f"""
-You are a financial fraud analyst.
-
-System detected unusual financial patterns:
+Financial anomaly detected:
 
 {anomaly_result}
 
-Explain:
-1) What this anomaly means
-2) Possible causes
-3) Whether it is dangerous
-4) What business should check immediately
+Explain in 4 short points:
+- What it means
+- Possible causes
+- Risk level
+- What to check now
+
+Keep response brief.
 """
     return ask_ollama(prompt)

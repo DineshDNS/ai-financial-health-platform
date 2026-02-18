@@ -10,4 +10,9 @@ class Inventory(Base):
     quantity = Column(Integer)
     unit_price = Column(Float)
     last_updated = Column(String)
+
+    # NEW FIELDS
+    source_file = Column(String, index=True)
+    user_id = Column(Integer, index=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)

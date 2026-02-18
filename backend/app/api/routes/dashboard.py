@@ -12,7 +12,10 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 # ---------------------------------------------------------
 @router.get("/summary")
 def get_summary(db: Session = Depends(get_db)):
-    data = get_dashboard_data(db)
+
+    current_user_id = 1  # TEMP: Phase 8 (will come from JWT in Phase 9)
+
+    data = get_dashboard_data(db, current_user_id)
 
     return {
         "health_score": data["health_score"],
@@ -25,7 +28,10 @@ def get_summary(db: Session = Depends(get_db)):
 # ---------------------------------------------------------
 @router.get("/metrics")
 def get_metrics(db: Session = Depends(get_db)):
-    data = get_dashboard_data(db)
+
+    current_user_id = 1
+
+    data = get_dashboard_data(db, current_user_id)
 
     return data["kpis"]
 
@@ -35,7 +41,10 @@ def get_metrics(db: Session = Depends(get_db)):
 # ---------------------------------------------------------
 @router.get("/trends")
 def get_trends(db: Session = Depends(get_db)):
-    data = get_dashboard_data(db)
+
+    current_user_id = 1
+
+    data = get_dashboard_data(db, current_user_id)
 
     return {
         "revenue": data["aggregates"]["revenue"],
@@ -49,7 +58,10 @@ def get_trends(db: Session = Depends(get_db)):
 # ---------------------------------------------------------
 @router.get("/full")
 def get_full_dashboard(db: Session = Depends(get_db)):
-    data = get_dashboard_data(db)
+
+    current_user_id = 1
+
+    data = get_dashboard_data(db, current_user_id)
 
     return {
         "summary": {
